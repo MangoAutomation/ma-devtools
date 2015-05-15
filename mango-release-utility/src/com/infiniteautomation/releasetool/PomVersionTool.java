@@ -34,7 +34,7 @@ public class PomVersionTool {
 
 		String pomName = "pom.xml";
 //		File pom = new File(pomName);
-		String coreVersion = "2.5.3";
+		String coreVersion = "2.6.0";
 		PomVersionTool tool = new PomVersionTool();
 
 		List<String> moduleDirectories = new ArrayList<String>();
@@ -76,14 +76,15 @@ public class PomVersionTool {
 		model = (Model) element.getValue();
 		Dependencies deps = model.getDependencies();
 		Dependency coreDep = null;
-		for (Dependency dep : deps.getDependency()) {
-			if (dep.getGroupId().equals("com.infiniteautomation")
-					&& (dep.getArtifactId().equals("mango"))) {
-				coreDep = dep;
-				break;
+		if(deps != null){
+			for (Dependency dep : deps.getDependency()) {
+				if (dep.getGroupId().equals("com.infiniteautomation")
+						&& (dep.getArtifactId().equals("mango"))) {
+					coreDep = dep;
+					break;
+				}
 			}
 		}
-
 		if (coreDep != null) {
 			System.out.println("Core Version Number: " + coreDep.getVersion());
 			coreDep.setVersion(coreVersion);
