@@ -6,9 +6,11 @@ package com.infiniteautomation;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHMilestone;
@@ -19,15 +21,15 @@ import org.kohsuke.github.GitHub;
 public class IssuesDownload {
 
     public static void main(String[] args) {
-    	saveIssues("infiniteautomation", "ma-core-public", GHIssueState.OPEN, "2.5.0 Release");
-    	saveIssues("infiniteautomation", "ma-core-public", GHIssueState.CLOSED, "2.5.0 Release");
+    	saveIssues("infiniteautomation", "ma-core-public", GHIssueState.OPEN, "2.6.0 Release");
+    	saveIssues("infiniteautomation", "ma-core-public", GHIssueState.CLOSED, "2.6.0 Release");
     	
     }
 
     public static String saveIssues(String username, String repositoryURL, GHIssueState issueState, String milestoneTitle) {
 
         try {
-        	
+        	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         	Properties config = new Properties();
             config.load(IssuesDownload.class.getResourceAsStream("/env.properties"));
 
@@ -35,13 +37,13 @@ public class IssuesDownload {
         	
             GitHub github = GitHub.connectUsingOAuth(githubtoken);
             GHUser user = github.getUser(username);
-            for(GHRepository repo : user.listRepositories()){
-            	System.out.println(repo.getFullName());
-            }
+//            for(GHRepository repo : user.listRepositories()){
+//            	System.out.println(repo.getFullName());
+//            }
             
             GHRepository repository = user.getRepository(repositoryURL);
             FileWriter writer = new FileWriter(repositoryURL + "-" + issueState + ".csv");
-            writer.append("Id, Title, Creator, Assignee, Milestone, State");
+            writer.append("Id, Title, Body, Creator, Assignee, Milestone, State, Date Closed");
             writer.append("\n");
             GHMilestone forMilestone = null;
             
@@ -62,7 +64,8 @@ public class IssuesDownload {
             for (GHIssue issue : issues) {
             	
                 writer.append(String.valueOf(issue.getNumber()) + ",");
-                writer.append(issue.getTitle().replace(",", " ") + ",");
+                writer.append(StringEscapeUtils.escapeCsv(issue.getTitle()) + ",");
+                writer.append(StringEscapeUtils.escapeCsv(issue.getBody()) + ",");
                 writer.append(issue.getUser().getLogin() + ",");
                 if (issue.getAssignee() != null) {
                     writer.append(issue.getAssignee().getName() + ",");
@@ -75,6 +78,10 @@ public class IssuesDownload {
                     writer.append(" ,");
                 }
                 writer.append(issue.getState() + ",");
+                String closeDate = "";
+                if(issue.getClosedAt() != null)
+                	closeDate = sdf.format(issue.getClosedAt());
+                writer.append(closeDate + ",");
                 writer.append("\n");
             }
             writer.flush();
