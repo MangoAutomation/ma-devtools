@@ -34,7 +34,7 @@ public class PomVersionTool {
 
 		String pomName = "pom.xml";
 //		File pom = new File(pomName);
-		String coreVersion = "2.6.6";
+		String coreVersion = "2.6.5";
 		PomVersionTool tool = new PomVersionTool();
 
 		List<String> moduleDirectories = new ArrayList<String>();
