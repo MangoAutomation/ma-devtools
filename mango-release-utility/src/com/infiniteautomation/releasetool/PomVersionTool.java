@@ -5,8 +5,6 @@
 package com.infiniteautomation.releasetool;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -25,37 +23,30 @@ import com.infiniteautomation.maven.Model.Dependencies;
  * @author Terry Packer
  *
  */
-public class PomVersionTool {
-
+public class PomVersionTool extends ModuleDirectoryScanner{
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 
-		String pomName = "pom.xml";
-//		File pom = new File(pomName);
-		String coreVersion = "2.6.5";
-		PomVersionTool tool = new PomVersionTool();
-
-		List<String> moduleDirectories = new ArrayList<String>();
-		moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/git/infiniteautomation/ma-modules-public");
-		moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/git/infiniteautomation/ma-modules-private");
-		moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/git/infiniteautomation/ma-modules-proprietary");
-
-		for(String moduleDirectory : moduleDirectories){
-			File dir = new File(moduleDirectory);
-			if (dir.exists())
-				tool.changeAllPomsCoreVersion(dir, pomName, coreVersion);
+		PomVersionTool tool = new PomVersionTool("2.7.0");
+		try {
+			tool.scan();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
-//		try {
-//			tool.alterCoreVersion(pom, coreVersion);
-//		} catch (JAXBException e) {
-//			e.printStackTrace();
-//		}
 
 	}
-
+	
+	private String coreVersion;
+	
+	public PomVersionTool(String coreVersion){
+		super("pom.xml", false);
+		this.coreVersion = coreVersion;
+	}
+	
 	/**
 	 * Alter the core version of a POM File
 	 * 
@@ -101,59 +92,10 @@ public class PomVersionTool {
 			System.out.println("No Core Dep Found!");
 	}
 
-	/**
-	 * Change all Poms in a directory
-	 * @param directory
-	 * @param fileNameToSearch
-	 * @param coreVersion
-	 */
-	public void changeAllPomsCoreVersion(File directory,
-			String fileNameToSearch, String coreVersion) {
-
-		if (directory.isDirectory()) {
-			searchRecursively(directory, fileNameToSearch, coreVersion);
-		} else {
-			System.out.println(directory.getAbsoluteFile()
-					+ " is not a directory!");
-		}
-
+	@Override
+	protected void foundFile(File file) throws Exception{
+		alterCoreVersion(file, coreVersion);
 	}
 
-	/**
-	 * Recursive Search in a directory
-	 * @param file
-	 * @param fileNameToSearch
-	 * @param coreVersion
-	 */
-	private void searchRecursively(File file, String fileNameToSearch,
-			String coreVersion) {
-
-		//Are we a directory AND we don't start with . (hidden)
-		if (file.isDirectory()&&!file.getName().startsWith(".")) {
-			System.out.println("Searching directory ... "
-					+ file.getAbsoluteFile());
-			// do you have permission to read this directory?
-			if (file.canRead()) {
-				for (File temp : file.listFiles()) {
-					if (temp.isDirectory()) {
-						searchRecursively(temp, fileNameToSearch, coreVersion);
-					} else {
-						if (fileNameToSearch.equals(temp.getName()
-								.toLowerCase())) {
-							try {
-								alterCoreVersion(temp, coreVersion);
-							} catch (JAXBException e) {
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-			} else {
-				System.out
-						.println(file.getAbsoluteFile() + "Permission Denied");
-			}
-		}
-
-	}
 
 }
