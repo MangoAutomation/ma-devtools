@@ -25,6 +25,7 @@ public abstract class ModuleDirectoryScanner {
 		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/git/infiniteautomation/ma-modules-proprietary");
 
 		this.fileNameToSearch = fileNameToSearch;
+		this.verbose = verbose;
 	}
 	
 	public void scan() throws Exception{
@@ -61,8 +62,9 @@ public abstract class ModuleDirectoryScanner {
 					if (temp.isDirectory()) {
 						searchRecursively(temp, fileNameToSearch);
 					} else {
-						if (fileNameToSearch.equals(temp.getName()
-								.toLowerCase())) {
+						if(verbose)
+							System.out.println("Processing " + temp.getAbsolutePath());
+						if (fileNameToSearch.equals(temp.getName())) {
 							try {
 								//Do the work
 								if(verbose)
@@ -75,7 +77,6 @@ public abstract class ModuleDirectoryScanner {
 					}
 				}
 			} else {
-				
 				System.out.println(file.getAbsoluteFile() + "Permission Denied");
 			}
 		}

@@ -31,7 +31,7 @@ public class PomVersionTool extends ModuleDirectoryScanner{
 	 */
 	public static void main(String[] args) {
 
-		PomVersionTool tool = new PomVersionTool("2.7.2");
+		PomVersionTool tool = new PomVersionTool("2.8.0");
 		try {
 			tool.scan();
 		} catch (Exception e) {

@@ -29,7 +29,7 @@ public class ModulePropertiesBulkEditor extends ModuleDirectoryScanner{
 	 */
 	public static void main(String[] args) {
 
-		ModulePropertiesBulkEditor tool = new ModulePropertiesBulkEditor("2.6", "2.7");
+		ModulePropertiesBulkEditor tool = new ModulePropertiesBulkEditor("2.7", "2.8");
 		try {
 			tool.scan();
 		} catch (Exception e) {
