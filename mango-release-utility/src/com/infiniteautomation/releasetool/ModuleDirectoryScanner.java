@@ -20,9 +20,9 @@ public abstract class ModuleDirectoryScanner {
 	
 	public ModuleDirectoryScanner(String fileNameToSearch, boolean verbose){
 		this.moduleDirectories = new ArrayList<String>();
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/git/infiniteautomation/ma-modules-public");
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/git/infiniteautomation/ma-modules-private");
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/git/infiniteautomation/ma-modules-proprietary");
+		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/2.8.x/git/infiniteautomation/ma-modules-public");
+		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/2.8.x/git/infiniteautomation/ma-modules-private");
+		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/2.8.x/git/infiniteautomation/ma-modules-proprietary");
 
 		this.fileNameToSearch = fileNameToSearch;
 		this.verbose = verbose;
@@ -52,8 +52,8 @@ public abstract class ModuleDirectoryScanner {
 	 */
 	protected void searchRecursively(File file, String fileNameToSearch) {
 
-		//Are we a directory AND we don't start with . (hidden)
-		if (file.isDirectory()&&!file.getName().startsWith(".")) {
+		//Are we a directory AND we don't start with . (hidden) AND it's not the build dir
+		if (file.isDirectory()&&!file.getName().startsWith(".")&&(!file.getName().equals("maven-target"))) {
 			if(verbose)
 				System.out.println("Searching directory ... " + file.getAbsoluteFile());
 			// do you have permission to read this directory?
@@ -71,6 +71,7 @@ public abstract class ModuleDirectoryScanner {
 									System.out.println("Found file: " + temp.getAbsolutePath());
 								this.foundFile(temp);
 							} catch (Exception e) {
+								System.out.println("Problem with file: " + temp.getAbsolutePath());
 								e.printStackTrace();
 							}
 						}

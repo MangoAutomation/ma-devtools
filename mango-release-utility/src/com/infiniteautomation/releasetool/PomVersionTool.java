@@ -31,7 +31,7 @@ public class PomVersionTool extends ModuleDirectoryScanner{
 	 */
 	public static void main(String[] args) {
 
-		PomVersionTool tool = new PomVersionTool("2.8.0");
+		PomVersionTool tool = new PomVersionTool("2.8.0",true);
 		try {
 			tool.scan();
 		} catch (Exception e) {
@@ -42,10 +42,13 @@ public class PomVersionTool extends ModuleDirectoryScanner{
 	}
 	
 	private String coreVersion;
+	private boolean incrementMinorVerion;
 	
-	public PomVersionTool(String coreVersion){
+	
+	public PomVersionTool(String coreVersion, boolean incrementMinorVersion){
 		super("pom.xml", false);
 		this.coreVersion = coreVersion;
+		this.incrementMinorVerion = incrementMinorVersion;
 	}
 	
 	/**
@@ -69,6 +72,20 @@ public class PomVersionTool extends ModuleDirectoryScanner{
 		model = (Model) element.getValue();
 		Parent parent = model.getParent();
 		
+		//Increment the minor version?
+		String version = model.getVersion();
+		if((incrementMinorVerion)&&(version != null)){
+			String versionParts[] = version.split("\\.");
+			if(versionParts.length != 3){
+				System.out.println("Unable to edit version for file: " + pom.getAbsolutePath());
+			}else{
+				Integer newMinorVersion = Integer.parseInt(versionParts[1].trim());
+				newMinorVersion++;
+				version = versionParts[0].trim() + "." + newMinorVersion + ".0";
+				model.setVersion(version);
+			}
+			found = true;
+		}
 		
 		Dependencies deps = model.getDependencies();
 		Dependency coreDep = null;
@@ -90,7 +107,7 @@ public class PomVersionTool extends ModuleDirectoryScanner{
 		}
 		
 		if(found){
-			System.out.println("Changing " + pom.getAbsolutePath() + " to use core version " + coreVersion);
+			System.out.println("Changing " + pom.getAbsolutePath() + " with version " + version +" to use core version " + coreVersion);
 			Marshaller marshaller = jc.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);

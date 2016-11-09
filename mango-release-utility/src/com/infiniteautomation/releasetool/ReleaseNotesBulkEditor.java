@@ -35,9 +35,10 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 		List<String> notes = new ArrayList<String>();
 		//notes.add("Adding Cron pattern polling option");
 		//notes.add("Adding optional quantization for polls");
-		boolean newVersion = true;
+		boolean newMinorVersion = true;
+		boolean newMicroVersion = false;
 		boolean newCore = true;
-		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("2.8.x",notes,newVersion,newCore);
+		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("2.8.x",notes, newMinorVersion, newMicroVersion ,newCore);
 		try {
 			tool.scan();
 		} catch (Exception e) {
@@ -49,14 +50,16 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 	
 	private String coreVersion;
 	private List<String> notes;
-	private boolean newVersion;
+	private boolean newMinorVersion;
+	private boolean newMicroVersion;
 	private boolean newCore;
 	
-	public ReleaseNotesBulkEditor(String coreVersion, List<String> notes, boolean newVersion, boolean newCore){
-		super("RELEASE-NOTES", true);
+	public ReleaseNotesBulkEditor(String coreVersion, List<String> notes, boolean newMinorVersion, boolean newMicroVersion, boolean newCore){
+		super("RELEASE-NOTES", false);
 		this.coreVersion = coreVersion;
 		this.notes = notes;
-		this.newVersion = newVersion;
+		this.newMinorVersion = newMinorVersion;
+		this.newMicroVersion = newMicroVersion;
 		this.newCore = newCore;
 	}
 	
@@ -80,19 +83,34 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 			}
 			
 			String newVersionString = null;
-			if(newVersion){
+			boolean versionEdited = false;
+			if(newMinorVersion || newMicroVersion){
 				//Modify the contents
 				//Get the latest version number
 				String latestVersionLine = allLines.get(0);
 				String[] parts = latestVersionLine.split("Version");
 				//Should have *Version, {version}*
+				if(parts.length < 2){
+					System.out.println("Bad line : " + latestVersionLine);
+				}
 				String version = parts[1].replace("*", "");
 				//Should have x.x.x
 				String versionParts[] = version.split("\\.");
-				newVersionString = "*Version " + versionParts[0].trim() + "." + versionParts[1].trim();
-				Integer newMicroVersion = Integer.parseInt(versionParts[2].trim());
-				newMicroVersion++;
-				newVersionString = newVersionString + "." + newMicroVersion + "*";
+				if(versionParts.length != 3){
+					System.out.println("Unable to edit version for file: " + file.getAbsolutePath());
+				}else{
+					if(newMinorVersion){
+						Integer newMinorVersion = Integer.parseInt(versionParts[1].trim());
+						newMinorVersion++;
+						newVersionString = "*Version " + versionParts[0].trim() + "." + newMinorVersion + ".0*";
+					}else if(newMicroVersion){
+						Integer newMicroVersion = Integer.parseInt(versionParts[2].trim());
+						newMicroVersion++;
+						newVersionString = "*Version " + versionParts[0].trim() + "." + versionParts[1].trim() + "." + newMicroVersion + "*";
+					}
+					versionEdited = true;
+				}
+				
 			}
 			
 			//Ensure we have space between the version notes
@@ -114,7 +132,7 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 					allLines.add(0, "* Upgraded to work with core version " + coreVersion);
 			}
 			//Add the version line
-			if(newVersion)
+			if(versionEdited)
 				allLines.add(0, newVersionString);
 			
 			if(modified){

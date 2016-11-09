@@ -29,7 +29,7 @@ public class ModulePropertiesBulkEditor extends ModuleDirectoryScanner{
 	 */
 	public static void main(String[] args) {
 
-		ModulePropertiesBulkEditor tool = new ModulePropertiesBulkEditor("2.7", "2.8");
+		ModulePropertiesBulkEditor tool = new ModulePropertiesBulkEditor("2.7", "2.8", true);
 		try {
 			tool.scan();
 		} catch (Exception e) {
@@ -41,11 +41,13 @@ public class ModulePropertiesBulkEditor extends ModuleDirectoryScanner{
 	
 	private String previousVersion;
 	private String currentVersion;
+	private boolean incrementMinorRelease;
 	
-	public ModulePropertiesBulkEditor(String prev, String current){
+	public ModulePropertiesBulkEditor(String prev, String current, boolean incrementMinorVersion){
 		super("module.properties", false);
 		this.previousVersion = prev;
 		this.currentVersion = current;
+		this.incrementMinorRelease = incrementMinorVersion;
 	}
 	
 	/* (non-Javadoc)
@@ -68,6 +70,19 @@ public class ModulePropertiesBulkEditor extends ModuleDirectoryScanner{
 					String[] parts = line.split("=");
 					if(parts[1].equals(previousVersion)){
 						line = "coreVersion=" + this.currentVersion;
+						modified = true;
+					}
+				}else if(incrementMinorRelease && line.startsWith("version")){
+					//Bump the minor version to be x.newversion.0
+					line = line.trim();
+					String[] parts = line.split("=");
+					String[] versionParts = parts[1].split("\\.");
+					if(versionParts.length != 3){
+						System.out.println("Unable to edit version for file: " + file.getAbsolutePath());
+					}else{
+						Integer minor = Integer.parseInt(versionParts[1]);
+						minor++;
+						line = "version=" + versionParts[0] + "." + minor + ".0";
 						modified = true;
 					}
 				}
