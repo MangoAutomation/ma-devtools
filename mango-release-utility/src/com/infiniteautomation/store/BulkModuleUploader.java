@@ -25,6 +25,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -79,10 +80,12 @@ public class BulkModuleUploader {
 		
 
 	}
-	
-	private final static String STORE_LOGIN_URL = "http://store.infiniteautomation.com/login";
-	private final static String UPLOAD_MONITOR_URL = "http://store.infiniteautomation.com/dwr/call/plaincall/AccountDwr.startUpload.dwr";
-	private final static String MODULE_UPLOAD_URL = "http://store.infiniteautomation.com/account/modules";
+	private final static String HTTP_BASE = "https://";
+	private final static String BASE_STORE_URL = "mangoautomation.net";
+	private final static String STORE_PORT = "8443";
+	private final static String STORE_LOGIN_URL = HTTP_BASE + BASE_STORE_URL + ":" + STORE_PORT + "/login";
+	private final static String UPLOAD_MONITOR_URL = HTTP_BASE + BASE_STORE_URL + ":" + STORE_PORT + "/dwr/call/plaincall/AccountDwr.startUpload.dwr";
+	private final static String MODULE_UPLOAD_URL = HTTP_BASE + BASE_STORE_URL + ":" + STORE_PORT + "/account/modules";
 	
 	private String sessionId;
 	
@@ -132,7 +135,7 @@ public class BulkModuleUploader {
 		    				String[] path = cookiePath[1].split("=");
 		    				this.sessionId = cookie[1];
 		    				BasicClientCookie c = new BasicClientCookie(cookie[0], cookie[1]);
-		    				c.setDomain("store.infiniteautomation.com");
+		    				c.setDomain(BASE_STORE_URL);
 		    				c.setPath(path[1]);
 		    				cookieStore.addCookie(c);	
 		    			}
@@ -207,7 +210,8 @@ public class BulkModuleUploader {
 		HttpPost httppost = new HttpPost(MODULE_UPLOAD_URL);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-		builder.addBinaryBody("uploadFile", module,ContentType.create("application/zip"), module.getName());
+		builder.addTextBody("clobber", "true");
+		builder.addBinaryBody("uploadFile", module, ContentType.create("application/zip"), module.getName());
 		httppost.setEntity(builder.build());
 		
 		//Execute and get the response.
