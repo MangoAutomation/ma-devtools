@@ -37,11 +37,23 @@ import org.apache.http.message.BasicNameValuePair;
  */
 public class BulkModuleUploader {
 
+	/**
+	 * 4 Arguments:
+	 * username - String
+	 * password - String
+	 * path-to-module-zip-dir - String
+	 * verbose - String ['true'/'false']
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 
-		if((args == null)||(args.length != 3)){
-			throw new RuntimeException("Expected params: email password path-to-modules-dir");
+		if((args == null)||(args.length < 3)){
+			throw new RuntimeException("Expected params: email password path-to-modules-dir [verbose]");
 		}
+		
+		if((args.length == 4)&&(args[3].equals("true")))
+			setupLogging();
 		
 		BulkModuleUploader uploader = new BulkModuleUploader();
 		
@@ -80,6 +92,7 @@ public class BulkModuleUploader {
 		
 
 	}
+
 	private final static String HTTP_BASE = "https://";
 	private final static String BASE_STORE_URL = "mangoautomation.net";
 	private final static String STORE_PORT = "8443";
@@ -137,6 +150,7 @@ public class BulkModuleUploader {
 		    				BasicClientCookie c = new BasicClientCookie(cookie[0], cookie[1]);
 		    				c.setDomain(BASE_STORE_URL);
 		    				c.setPath(path[1]);
+		    				c.setVersion(0);
 		    				cookieStore.addCookie(c);	
 		    			}
 		    		}
@@ -186,7 +200,7 @@ public class BulkModuleUploader {
 		if (entity != null) {
 		    InputStream instream = entity.getContent();
 		    try {
-		    	if(response.getStatusLine().getStatusCode() > 399){
+		    	if(response.getStatusLine().getStatusCode() > 300){
 		    		for(Header header : response.getAllHeaders()){
 		    			System.out.println(header.getName() + "-->" + header.getValue());
 		    		}
@@ -213,15 +227,14 @@ public class BulkModuleUploader {
 		builder.addTextBody("clobber", "true");
 		builder.addBinaryBody("uploadFile", module, ContentType.create("application/zip"), module.getName());
 		httppost.setEntity(builder.build());
-		
 		//Execute and get the response.
 		HttpResponse response = httpclient.execute(httppost);
 		HttpEntity entity = response.getEntity();
-
+		
 		if (entity != null) {
 		    InputStream instream = entity.getContent();
 		    try {
-		    	if(response.getStatusLine().getStatusCode() > 399){
+		    	if(response.getStatusLine().getStatusCode() > 300){
 		    		for(Header header : response.getAllHeaders()){
 		    			System.out.println(header.getName() + "-->" + header.getValue());
 		    		}
@@ -232,6 +245,19 @@ public class BulkModuleUploader {
 		        instream.close();
 		    }
 		}
+	}
+	
+	/**
+	 * 
+	 */
+	private static void setupLogging() {
+		System.setProperty("org.apache.commons.logging.Log","org.apache.commons.logging.impl.SimpleLog");
+		System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
+		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.wire", "DEBUG");
+		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.impl.conn", "DEBUG");
+		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.impl.client", "DEBUG");
+		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client", "DEBUG");
+		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http", "DEBUG");
 	}
 	
 	/**
