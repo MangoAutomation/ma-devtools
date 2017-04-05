@@ -94,8 +94,8 @@ public class BulkModuleUploader {
 	}
 
 	private final static String HTTP_BASE = "https://";
-	private final static String BASE_STORE_URL = "mangoautomation.net";
-	private final static String STORE_PORT = "8443";
+	private final static String BASE_STORE_URL = "storebeta.infiniteautomation.com";
+	private final static String STORE_PORT = "443";
 	private final static String STORE_LOGIN_URL = HTTP_BASE + BASE_STORE_URL + ":" + STORE_PORT + "/login";
 	private final static String UPLOAD_MONITOR_URL = HTTP_BASE + BASE_STORE_URL + ":" + STORE_PORT + "/dwr/call/plaincall/AccountDwr.startUpload.dwr";
 	private final static String MODULE_UPLOAD_URL = HTTP_BASE + BASE_STORE_URL + ":" + STORE_PORT + "/account/modules";
