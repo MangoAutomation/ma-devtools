@@ -127,6 +127,7 @@ public class BulkModuleUploader {
 		//Execute and get the response.
 		HttpResponse response = httpclient.execute(httppost);
 		HttpEntity entity = response.getEntity();
+		boolean locationHeader = false;
 		if (entity != null) {
 		    InputStream instream = entity.getContent();
 		    try {
@@ -140,6 +141,8 @@ public class BulkModuleUploader {
 		    	}else{
 		    		for(Header header : response.getAllHeaders()){
 		    			System.out.println(header.getName() + "-->" + header.getValue());
+		    			if(header.getName().equals("Location"))
+		    				locationHeader = true; //we should be redirected to /account/licenses on success
 		    			if(header.getName().equals("Set-Cookie")){
 		    				//Set our cookie here
 		    				String[] cookiePath = header.getValue().split(";");
@@ -149,6 +152,7 @@ public class BulkModuleUploader {
 		    				this.sessionId = cookie[1];
 		    				BasicClientCookie c = new BasicClientCookie(cookie[0], cookie[1]);
 		    				c.setDomain(BASE_STORE_URL);
+		    				c.setSecure(HTTP_BASE.startsWith("https"));
 		    				c.setPath(path[1]);
 		    				c.setVersion(0);
 		    				cookieStore.addCookie(c);	
@@ -159,6 +163,8 @@ public class BulkModuleUploader {
 		        instream.close();
 		    }
 		}
+		if(!locationHeader)
+			System.out.println("\n\n===== !!!! ### !! $ NO LOCATION HEADER LOGIN LIKELY FAILED $ !! ### !!!! =====\n\n");
 		return httpclient;
 	}
 	
