@@ -25,7 +25,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -163,7 +162,7 @@ public class BulkModuleUploader {
 		    				this.sessionId = cookie[1];
 		    				BasicClientCookie c = new BasicClientCookie(cookie[0], cookie[1]);
 		    				c.setDomain(cookieDomain);
-		    				c.setSecure(HTTP_BASE.startsWith("https"));
+		    				c.setSecure(loginUrl.startsWith("https"));
 		    				c.setPath(path[1]);
 		    				c.setVersion(0);
 		    				cookieStore.addCookie(c);	
