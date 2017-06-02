@@ -38,7 +38,8 @@ import org.apache.http.message.BasicNameValuePair;
 public class BulkModuleUploader {
 
 	/**
-	 * 4 Arguments:
+	 * 5 Arguments:
+	 * storeUrl - String
 	 * username - String
 	 * password - String
 	 * path-to-module-zip-dir - String
@@ -48,18 +49,18 @@ public class BulkModuleUploader {
 	 */
 	public static void main(String[] args) {
 
-		if((args == null)||(args.length < 3)){
-			throw new RuntimeException("Expected params: email password path-to-modules-dir [verbose]");
+		if((args == null)||(args.length < 4)){
+			throw new RuntimeException("Expected params: url email password path-to-modules-dir [verbose]");
 		}
 		
-		if((args.length == 4)&&(args[3].equals("true")))
+		if((args.length == 5)&&(args[4].equals("true")))
 			setupLogging();
 		
-		BulkModuleUploader uploader = new BulkModuleUploader();
+		BulkModuleUploader uploader = new BulkModuleUploader(args[0]);
 		
-		String email = args[0];
-		String password = args[1];
-		String moduleDir = args[2];
+		String email = args[1];
+		String password = args[2];
+		String moduleDir = args[3];
 		try {
 			HttpClient httpclient = uploader.login(email, password);
 			System.out.println("Logged in as: " + email);
@@ -92,15 +93,25 @@ public class BulkModuleUploader {
 		
 
 	}
-
-	private final static String HTTP_BASE = "https://";
-	private final static String BASE_STORE_URL = "storebeta.infiniteautomation.com";
-	private final static String STORE_PORT = "443";
-	private final static String STORE_LOGIN_URL = HTTP_BASE + BASE_STORE_URL + ":" + STORE_PORT + "/login";
-	private final static String UPLOAD_MONITOR_URL = HTTP_BASE + BASE_STORE_URL + ":" + STORE_PORT + "/dwr/call/plaincall/AccountDwr.startUpload.dwr";
-	private final static String MODULE_UPLOAD_URL = HTTP_BASE + BASE_STORE_URL + ":" + STORE_PORT + "/account/modules";
 	
 	private String sessionId;
+	private final String loginUrl;
+	private final String uploadMonitorUrl;
+	private final String moduleUploadUrl;
+	private final String cookieDomain;
+
+	/**
+	 * 
+	 * @param url without ending slash ie https://store.infiniteautomation.com
+	 */
+	public BulkModuleUploader(String url){
+		this.loginUrl = url + "/login";
+		this.uploadMonitorUrl = url + "/dwr/call/plaincall/AccountDwr.startUpload.dwr";
+		this.moduleUploadUrl = url + "/account/modules";
+		
+		String[] parts = url.split("//");
+		this.cookieDomain = parts[1];
+	}
 	
 	
 	/**
@@ -115,7 +126,7 @@ public class BulkModuleUploader {
 		BasicCookieStore cookieStore = new BasicCookieStore();
 		HttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
 
-		HttpPost httppost = new HttpPost(STORE_LOGIN_URL);
+		HttpPost httppost = new HttpPost(loginUrl);
 
 		// Request parameters and other properties.
 		List<NameValuePair> params = new ArrayList<NameValuePair>(2);
@@ -151,7 +162,7 @@ public class BulkModuleUploader {
 		    				String[] path = cookiePath[1].split("=");
 		    				this.sessionId = cookie[1];
 		    				BasicClientCookie c = new BasicClientCookie(cookie[0], cookie[1]);
-		    				c.setDomain(BASE_STORE_URL);
+		    				c.setDomain(cookieDomain);
 		    				c.setSecure(HTTP_BASE.startsWith("https"));
 		    				c.setPath(path[1]);
 		    				c.setVersion(0);
@@ -185,7 +196,7 @@ public class BulkModuleUploader {
 	
 	public void startUploadMonitor(HttpClient httpclient) throws ClientProtocolException, IOException{
 		
-		HttpPost httppost = new HttpPost(UPLOAD_MONITOR_URL);
+		HttpPost httppost = new HttpPost(uploadMonitorUrl);
 
 		StringBuilder payload = new StringBuilder();
 		payload.append("callCount=1\n");
@@ -227,7 +238,7 @@ public class BulkModuleUploader {
 	 */
 	public void postModule(HttpClient httpclient, File module) throws ClientProtocolException, IOException{
 		
-		HttpPost httppost = new HttpPost(MODULE_UPLOAD_URL);
+		HttpPost httppost = new HttpPost(moduleUploadUrl);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 		builder.addTextBody("clobber", "true");

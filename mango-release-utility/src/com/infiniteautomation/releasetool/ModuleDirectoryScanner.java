@@ -20,10 +20,11 @@ public abstract class ModuleDirectoryScanner {
 	
 	public ModuleDirectoryScanner(String fileNameToSearch, boolean verbose){
 		this.moduleDirectories = new ArrayList<String>();
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/2.8.x/git/infiniteautomation/ma-modules-public");
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/2.8.x/git/infiniteautomation/ma-modules-private");
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/2.8.x/git/infiniteautomation/ma-modules-proprietary");
-
+		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/development/git/infiniteautomation/ma-modules-public");
+		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/development/git/infiniteautomation/ma-modules-private");
+		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/development/git/infiniteautomation/ma-modules-proprietary");
+		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/development/git/infiniteautomation/ma-dashboards");
+		
 		this.fileNameToSearch = fileNameToSearch;
 		this.verbose = verbose;
 	}

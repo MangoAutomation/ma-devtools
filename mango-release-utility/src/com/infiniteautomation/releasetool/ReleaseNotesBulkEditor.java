@@ -35,10 +35,8 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 		List<String> notes = new ArrayList<String>();
 		//notes.add("Adding Cron pattern polling option");
 		//notes.add("Adding optional quantization for polls");
-		boolean newMinorVersion = true;
-		boolean newMicroVersion = false;
 		boolean newCore = true;
-		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("2.8.x",notes, newMinorVersion, newMicroVersion ,newCore);
+		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("3.1.0", "3.1.x", notes, newCore);
 		try {
 			tool.scan();
 		} catch (Exception e) {
@@ -49,17 +47,17 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 	}
 	
 	private String coreVersion;
+	private String coreCompatibilityVersion;
 	private List<String> notes;
-	private boolean newMinorVersion;
-	private boolean newMicroVersion;
 	private boolean newCore;
+	private boolean incrementMicro = false;
+	private boolean incrementMinor = false;
 	
-	public ReleaseNotesBulkEditor(String coreVersion, List<String> notes, boolean newMinorVersion, boolean newMicroVersion, boolean newCore){
+	public ReleaseNotesBulkEditor(String coreVersion, String coreCompatibilityVersion, List<String> notes, boolean newCore){
 		super("RELEASE-NOTES", false);
 		this.coreVersion = coreVersion;
+		this.coreCompatibilityVersion = coreCompatibilityVersion;
 		this.notes = notes;
-		this.newMinorVersion = newMinorVersion;
-		this.newMicroVersion = newMicroVersion;
 		this.newCore = newCore;
 	}
 	
@@ -84,34 +82,41 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 			
 			String newVersionString = null;
 			boolean versionEdited = false;
-			if(newMinorVersion || newMicroVersion){
-				//Modify the contents
-				//Get the latest version number
-				String latestVersionLine = allLines.get(0);
-				String[] parts = latestVersionLine.split("Version");
-				//Should have *Version, {version}*
-				if(parts.length < 2){
-					System.out.println("Bad line : " + latestVersionLine);
-				}
-				String version = parts[1].replace("*", "");
-				//Should have x.x.x
-				String versionParts[] = version.split("\\.");
-				if(versionParts.length != 3){
-					System.out.println("Unable to edit version for file: " + file.getAbsolutePath());
-				}else{
-					if(newMinorVersion){
-						Integer newMinorVersion = Integer.parseInt(versionParts[1].trim());
-						newMinorVersion++;
-						newVersionString = "*Version " + versionParts[0].trim() + "." + newMinorVersion + ".0*";
-					}else if(newMicroVersion){
-						Integer newMicroVersion = Integer.parseInt(versionParts[2].trim());
-						newMicroVersion++;
-						newVersionString = "*Version " + versionParts[0].trim() + "." + versionParts[1].trim() + "." + newMicroVersion + "*";
+			if(newCore){
+				//Always set to the core version
+				newVersionString = "*Version " + coreVersion + "*";
+				versionEdited = true;
+			}else{
+				if(incrementMicro || incrementMinor){
+					//Modify the contents
+					//Get the latest version number
+					String latestVersionLine = allLines.get(0);
+					String[] parts = latestVersionLine.split("Version");
+					//Should have *Version, {version}*
+					if(parts.length < 2){
+						System.out.println("Bad line : " + latestVersionLine);
 					}
-					versionEdited = true;
+					String version = parts[1].replace("*", "");
+					//Should have x.x.x
+					String versionParts[] = version.split("\\.");
+					if(versionParts.length != 3){
+						System.out.println("Unable to edit version for file: " + file.getAbsolutePath());
+					}else{
+						if(incrementMinor){
+							Integer newMinorVersion = Integer.parseInt(versionParts[1].trim());
+							newMinorVersion++;
+							newVersionString = "*Version " + versionParts[0].trim() + "." + newMinorVersion + ".0*";
+						}else if(incrementMicro){
+							Integer newMicroVersion = Integer.parseInt(versionParts[2].trim());
+							newMicroVersion++;
+							newVersionString = "*Version " + versionParts[0].trim() + "." + versionParts[1].trim() + "." + newMicroVersion + "*";
+						}
+						versionEdited = true;
+					}
+					
 				}
-				
 			}
+			
 			
 			//Ensure we have space between the version notes
 			boolean breakSpace = false;
@@ -127,9 +132,9 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 			if(newCore){
 				if(!breakSpace){
 					breakSpace = true;
-					allLines.add(0, "* Upgraded to work with core version " + coreVersion + NEWLINE);
+					allLines.add(0, "* Upgraded to work with core version " + coreCompatibilityVersion + NEWLINE);
 				}else
-					allLines.add(0, "* Upgraded to work with core version " + coreVersion);
+					allLines.add(0, "* Upgraded to work with core version " + coreCompatibilityVersion);
 			}
 			//Add the version line
 			if(versionEdited)
