@@ -644,7 +644,8 @@ public class DefaultMOTable<R extends MOTableRow, C extends MOColumn, M extends 
       return;
     }
     
-    MOTableCellInfo cell = new CellInfo(this, getIndexPart(cellOID), colId, colId);
+    //MOTableCellInfo cell = new CellInfo(this, getIndexPart(cellOID), colId, colId);
+    MOTableCellInfo cell = new CellInfo(this, fullIndex, colId, colId);
 
     
     if ((cell.getColumn() >= 0) && (cell.getColumn() < columns.length)) {
