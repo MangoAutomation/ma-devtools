@@ -20,7 +20,7 @@ import org.junit.Test;
 import com.infiniteautomation.store.BulkModuleUploader;
 
 /**
- * Upload the modules to the store using a properties file that may have been defined.
+ * Upload the core and all modules to the store using a properties file that may have been defined.
  * 
  * @author Terry Packer
  */
@@ -40,12 +40,22 @@ public class TestUploadModules {
 			String username = props.getProperty("store.username");
 			String password = props.getProperty("store.password");
 			String moduleDir = props.getProperty("modules.dir");
+			String coreZip = props.getProperty("core.zip");
 			
 			BulkModuleUploader uploader = new BulkModuleUploader(url);
 			
 			try {
 				HttpClient httpclient = uploader.login(username, password);
 				System.out.println("Logged in as: " + username);
+				
+				//Upload Core if there is one
+				File core = new File(coreZip);
+				if(core.exists() && core.isFile()) {
+				    System.out.println("**** Uploading " + core.getAbsolutePath() + "... ****");
+                    uploader.startUploadMonitor(httpclient, "core");
+                    uploader.postFile(httpclient, core);
+                    System.out.println("**** " + core.getAbsolutePath() + " Uploaded ****");
+				}
 				
 				//Upload Modules
 				File dir = new File(moduleDir);
