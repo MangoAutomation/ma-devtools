@@ -36,7 +36,7 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 		//notes.add("Adding Cron pattern polling option");
 		//notes.add("Adding optional quantization for polls");
 		boolean newCore = true;
-		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("3.1.0", "3.1.x", notes, newCore);
+		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("3.2.0", "3.2.x", notes, newCore);
 		try {
 			tool.scan();
 		} catch (Exception e) {

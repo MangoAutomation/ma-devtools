@@ -62,8 +62,8 @@ public class TestUploadModules {
 					
 					for(File module : modules){
 						System.out.println("**** Uploading " + module.getAbsolutePath() + "... ****");
-						uploader.startUploadMonitor(httpclient);
-						uploader.postModule(httpclient, module);
+						uploader.startUploadMonitor(httpclient, "modules");
+						uploader.postFile(httpclient, module);
 						System.out.println("**** Module " + module.getAbsolutePath() + " Uploaded ****");
 					}
 					

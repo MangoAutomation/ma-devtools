@@ -76,8 +76,8 @@ public class BulkModuleUploader {
 				
 				for(File module : modules){
 					System.out.println("**** Uploading " + module.getAbsolutePath() + "... ****");
-					uploader.startUploadMonitor(httpclient);
-					uploader.postModule(httpclient, module);
+					uploader.startUploadMonitor(httpclient, "modules");
+					uploader.postFile(httpclient, module);
 					System.out.println("**** Module " + module.getAbsolutePath() + " Uploaded ****");
 				}
 				
@@ -93,11 +93,11 @@ public class BulkModuleUploader {
 
 	}
 	
-	private String sessionId;
-	private final String loginUrl;
-	private final String uploadMonitorUrl;
-	private final String moduleUploadUrl;
-	private final String cookieDomain;
+	protected String sessionId;
+	protected final String loginUrl;
+	protected final String uploadMonitorUrl;
+	protected final String moduleUploadUrl;
+	protected final String cookieDomain;
 
 	/**
 	 * 
@@ -193,13 +193,20 @@ public class BulkModuleUploader {
 
 	 */
 	
-	public void startUploadMonitor(HttpClient httpclient) throws ClientProtocolException, IOException{
+	/**
+	 * 
+	 * @param httpclient
+	 * @param page
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public void startUploadMonitor(HttpClient httpclient, String page) throws ClientProtocolException, IOException{
 		
 		HttpPost httppost = new HttpPost(uploadMonitorUrl);
 
 		StringBuilder payload = new StringBuilder();
 		payload.append("callCount=1\n");
-		payload.append("page=/account/modules\n");
+		payload.append("page=/account/" + page + "\n");
 		payload.append("httpSessionId=" + sessionId + "\n");
 		payload.append("scriptSessionId=46EAA8AE7D0393F38917E4B0FF0D07C3280\n");
 		payload.append("c0-scriptName=AccountDwr\n");
@@ -235,13 +242,13 @@ public class BulkModuleUploader {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public void postModule(HttpClient httpclient, File module) throws ClientProtocolException, IOException{
+	public void postFile(HttpClient httpclient, File file) throws ClientProtocolException, IOException{
 		
 		HttpPost httppost = new HttpPost(moduleUploadUrl);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 		builder.addTextBody("clobber", "true");
-		builder.addBinaryBody("uploadFile", module, ContentType.create("application/zip"), module.getName());
+		builder.addBinaryBody("uploadFile", file, ContentType.create("application/zip"), file.getName());
 		httppost.setEntity(builder.build());
 		//Execute and get the response.
 		HttpResponse response = httpclient.execute(httppost);
@@ -266,7 +273,7 @@ public class BulkModuleUploader {
 	/**
 	 * 
 	 */
-	private static void setupLogging() {
+	protected static void setupLogging() {
 		System.setProperty("org.apache.commons.logging.Log","org.apache.commons.logging.impl.SimpleLog");
 		System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
 		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.wire", "DEBUG");
@@ -280,7 +287,7 @@ public class BulkModuleUploader {
 	 * Helper to print out the response
 	 * @param is
 	 */
-	private void printContent(InputStream is){
+	protected void printContent(InputStream is){
 	    String inputLine;
 	    BufferedReader br = new BufferedReader(new InputStreamReader(is));
 	    try {
