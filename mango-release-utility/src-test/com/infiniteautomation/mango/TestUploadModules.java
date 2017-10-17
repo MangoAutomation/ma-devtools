@@ -41,6 +41,11 @@ public class TestUploadModules {
 			String password = props.getProperty("store.password");
 			String moduleDir = props.getProperty("modules.dir");
 			String coreZip = props.getProperty("core.zip");
+			String uploadModulesString = props.getProperty("modules.upload");
+			boolean uploadModules = false;
+			if(uploadModulesString != null) {
+			    uploadModules = Boolean.parseBoolean(uploadModulesString);
+			}
 			
 			BulkModuleUploader uploader = new BulkModuleUploader(url);
 			
@@ -56,6 +61,10 @@ public class TestUploadModules {
                     uploader.postFile(httpclient, core, "core");
                     System.out.println("**** " + core.getAbsolutePath() + " Uploaded ****");
 				}
+				
+				//Are we supposed to upload modules?
+				if(!uploadModules)
+				    return;
 				
 				//Upload Modules
 				File dir = new File(moduleDir);
