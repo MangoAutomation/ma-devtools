@@ -77,7 +77,7 @@ public class BulkModuleUploader {
 				for(File module : modules){
 					System.out.println("**** Uploading " + module.getAbsolutePath() + "... ****");
 					uploader.startUploadMonitor(httpclient, "modules");
-					uploader.postFile(httpclient, module);
+					uploader.postFile(httpclient, module, "modules");
 					System.out.println("**** Module " + module.getAbsolutePath() + " Uploaded ****");
 				}
 				
@@ -96,7 +96,7 @@ public class BulkModuleUploader {
 	protected String sessionId;
 	protected final String loginUrl;
 	protected final String uploadMonitorUrl;
-	protected final String moduleUploadUrl;
+	protected final String uploadUrlBase;
 	protected final String cookieDomain;
 
 	/**
@@ -106,7 +106,7 @@ public class BulkModuleUploader {
 	public BulkModuleUploader(String url){
 		this.loginUrl = url + "/login";
 		this.uploadMonitorUrl = url + "/dwr/call/plaincall/AccountDwr.startUpload.dwr";
-		this.moduleUploadUrl = url + "/account/modules";
+		this.uploadUrlBase = url + "/account/";
 		
 		String[] parts = url.split("//");
 		this.cookieDomain = parts[1];
@@ -242,12 +242,13 @@ public class BulkModuleUploader {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public void postFile(HttpClient httpclient, File file) throws ClientProtocolException, IOException{
+	public void postFile(HttpClient httpclient, File file, String page) throws ClientProtocolException, IOException{
 		
-		HttpPost httppost = new HttpPost(moduleUploadUrl);
+		HttpPost httppost = new HttpPost(uploadUrlBase + page);
 		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 		builder.addTextBody("clobber", "true");
+		builder.addTextBody("active", "true");
 		builder.addBinaryBody("uploadFile", file, ContentType.create("application/zip"), file.getName());
 		httppost.setEntity(builder.build());
 		//Execute and get the response.

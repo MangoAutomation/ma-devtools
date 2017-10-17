@@ -53,7 +53,7 @@ public class TestUploadModules {
 				if(core.exists() && core.isFile()) {
 				    System.out.println("**** Uploading " + core.getAbsolutePath() + "... ****");
                     uploader.startUploadMonitor(httpclient, "core");
-                    uploader.postFile(httpclient, core);
+                    uploader.postFile(httpclient, core, "core");
                     System.out.println("**** " + core.getAbsolutePath() + " Uploaded ****");
 				}
 				
@@ -73,7 +73,7 @@ public class TestUploadModules {
 					for(File module : modules){
 						System.out.println("**** Uploading " + module.getAbsolutePath() + "... ****");
 						uploader.startUploadMonitor(httpclient, "modules");
-						uploader.postFile(httpclient, module);
+						uploader.postFile(httpclient, module, "modules");
 						System.out.println("**** Module " + module.getAbsolutePath() + " Uploaded ****");
 					}
 					

@@ -49,7 +49,7 @@ public class CoreUploader extends BulkModuleUploader{
 			if(coreFile.exists()) {
                 System.out.println("**** Uploading " + coreFile.getAbsolutePath() + "... ****");
                 uploader.startUploadMonitor(httpclient, "core");
-                uploader.postFile(httpclient, coreFile);
+                uploader.postFile(httpclient, coreFile, "core");
                 System.out.println("**** " + coreFile.getAbsolutePath() + " Uploaded ****");
 			}else {
 			    throw new RuntimeException("No core file found!");
