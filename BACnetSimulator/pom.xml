@@ -21,5 +21,10 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>com.serotonin</groupId>
+            <artifactId>bacnet4j</artifactId>
+            <version>4.1.3-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>
