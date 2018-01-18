@@ -76,12 +76,24 @@ public class BacNetLocalSimulator {
             MstpNode node = new SlaveNode("SlaveNode", is, os, (byte) 3);
             network = new MstpNetwork(node, 20);
         } else {
+            String bind = "0.0.0.0";
+            int port = 47808;
+            String broadcast = "255.255.255.255";
+            
+            if(args != null) {
+                if(args.length > 0)
+                    bind = args[0];
+                if(args.length > 1)
+                    port = Integer.parseInt(args[1]);
+                if(args.length > 2)
+                    broadcast = args[2];
+            }
             System.out.println("Starting IP Network");
             network = new IpNetworkBuilder()
-                    .withPort(47808)
-                    .withLocalBindAddress("0.0.0.0")
+                    .withPort(port)
+                    .withLocalBindAddress(bind)
                     .withLocalNetworkNumber(20)
-                    .withBroadcast("255.255.255.255", 255)
+                    .withBroadcast(broadcast, 255)
                     .build();
                     
        }
@@ -169,7 +181,7 @@ public class BacNetLocalSimulator {
         return so;
     }
     /**
-     * Create an example schedule
+     * Create an example calendar
      * @return
      * @throws BACnetServiceException
      */
