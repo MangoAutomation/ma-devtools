@@ -68,7 +68,7 @@ public class TestUploadModules {
                     });
 				    
 				    for(String coreName : cores) {
-				        File coreUpload = new File(coreName);
+				        File coreUpload = new File(core, coreName);
     				    System.out.println("**** Uploading " + coreUpload.getAbsolutePath() + "... ****");
                         uploader.startUploadMonitor(httpclient, "core");
                         uploader.postFile(httpclient, coreUpload, "core");
