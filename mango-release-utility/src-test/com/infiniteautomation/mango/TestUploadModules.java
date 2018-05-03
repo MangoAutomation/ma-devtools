@@ -40,7 +40,7 @@ public class TestUploadModules {
 			String username = props.getProperty("store.username");
 			String password = props.getProperty("store.password");
 			String moduleDir = props.getProperty("modules.dir");
-			String coreZip = props.getProperty("core.zip");
+			String coreZip = props.getProperty("core.zip"); //Directory where the core zip lives
 			String uploadModulesString = props.getProperty("modules.upload");
 			boolean uploadModules = false;
 			if(uploadModulesString != null) {
@@ -55,11 +55,25 @@ public class TestUploadModules {
 				
 				//Upload Core if there is one
 				File core = new File(coreZip);
-				if(core.exists() && core.isFile()) {
-				    System.out.println("**** Uploading " + core.getAbsolutePath() + "... ****");
-                    uploader.startUploadMonitor(httpclient, "core");
-                    uploader.postFile(httpclient, core, "core");
-                    System.out.println("**** " + core.getAbsolutePath() + " Uploaded ****");
+				if(core.exists() && core.isDirectory()) {
+				    String[] cores = core.list(new FilenameFilter() {
+                        
+                        @Override
+                        public boolean accept(File dir, String name) {
+                            if(name.startsWith("m2m2-core-") && name.endsWith(".zip"))
+                                return true;
+                            else
+                                return false;
+                        }
+                    });
+				    
+				    for(String coreName : cores) {
+				        File coreUpload = new File(coreName);
+    				    System.out.println("**** Uploading " + coreUpload.getAbsolutePath() + "... ****");
+                        uploader.startUploadMonitor(httpclient, "core");
+                        uploader.postFile(httpclient, coreUpload, "core");
+                        System.out.println("**** " + coreUpload.getAbsolutePath() + " Uploaded ****");
+				    }
 				}
 				
 				//Are we supposed to upload modules?
