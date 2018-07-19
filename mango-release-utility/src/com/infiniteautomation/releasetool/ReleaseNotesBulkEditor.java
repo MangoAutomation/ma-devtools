@@ -36,7 +36,8 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 		//notes.add("Adding Cron pattern polling option");
 		//notes.add("Adding optional quantization for polls");
 		boolean newCore = true;
-		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("3.2.0", "3.2.x", notes, newCore);
+		boolean verbose = false;
+		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("3.5.0", "3.5.x", notes, newCore, verbose);
 		try {
 			tool.scan();
 		} catch (Exception e) {
@@ -53,8 +54,8 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 	private boolean incrementMicro = false;
 	private boolean incrementMinor = false;
 	
-	public ReleaseNotesBulkEditor(String coreVersion, String coreCompatibilityVersion, List<String> notes, boolean newCore){
-		super("RELEASE-NOTES", false);
+	public ReleaseNotesBulkEditor(String coreVersion, String coreCompatibilityVersion, List<String> notes, boolean newCore, boolean verbose){
+		super("RELEASE-NOTES", verbose);
 		this.coreVersion = coreVersion;
 		this.coreCompatibilityVersion = coreCompatibilityVersion;
 		this.notes = notes;

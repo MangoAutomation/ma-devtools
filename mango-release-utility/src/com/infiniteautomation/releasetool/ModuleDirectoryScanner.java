@@ -20,18 +20,21 @@ public abstract class ModuleDirectoryScanner {
 	
 	public ModuleDirectoryScanner(String fileNameToSearch, boolean verbose){
 		this.moduleDirectories = new ArrayList<String>();
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/development/git/infiniteautomation/ma-modules-public");
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/development/git/infiniteautomation/ma-modules-private");
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/development/git/infiniteautomation/ma-modules-proprietary");
-		this.moduleDirectories.add("/Users/tpacker/Documents/Work/Infinite/dev/development/git/infiniteautomation/ma-dashboards");
+		this.moduleDirectories.add("ma-modules-public");
+		this.moduleDirectories.add("ma-modules-private");
+		this.moduleDirectories.add("ma-modules-proprietary");
+		this.moduleDirectories.add("ma-dashboards");
+		this.moduleDirectories.add("dashboards");
 		
 		this.fileNameToSearch = fileNameToSearch;
 		this.verbose = verbose;
 	}
 	
 	public void scan() throws Exception{
+	    System.out.println("Working Directory = " +
+	              System.getProperty("user.dir"));
 		for(String moduleDirectory : moduleDirectories){
-			File dir = new File(moduleDirectory);
+			File dir = new File(new File("../../"), moduleDirectory);
 			if (dir.isDirectory() && dir.exists()) {
 				searchRecursively(dir, fileNameToSearch);
 			}
