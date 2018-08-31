@@ -39,7 +39,7 @@ public class TestUploadModules {
 			String url = props.getProperty("store.url");
 			String username = props.getProperty("store.username");
 			String password = props.getProperty("store.password");
-			String moduleDir = props.getProperty("modules.dir");
+			String moduleDirs = props.getProperty("modules.dirs");
 			String coreZip = props.getProperty("core.zip"); //Directory where the core zip lives
 			String uploadModulesString = props.getProperty("modules.upload");
 			boolean uploadModules = false;
@@ -81,25 +81,28 @@ public class TestUploadModules {
 				    return;
 				
 				//Upload Modules
-				File dir = new File(moduleDir);
-				if(!dir.exists())
-					fail("Directory " + moduleDir + " doesn't exist.");
-				
-				if(dir.isDirectory()){
-					File[] modules = dir.listFiles(new FilenameFilter(){
-						@Override
-						public boolean accept(File dir, String name) {
-							return name.endsWith(".zip");
-						}
-					});
-					
-					for(File module : modules){
-						System.out.println("**** Uploading " + module.getAbsolutePath() + "... ****");
-						uploader.startUploadMonitor(httpclient, "modules");
-						uploader.postFile(httpclient, module, "modules");
-						System.out.println("**** Module " + module.getAbsolutePath() + " Uploaded ****");
-					}
-					
+				String[] moduleDirNames = moduleDirs.split(",");
+				for(String moduleDir : moduleDirNames) {
+    				File dir = new File(moduleDir);
+    				if(!dir.exists())
+    					fail("Directory " + moduleDir + " doesn't exist.");
+    				
+    				if(dir.isDirectory()){
+    					File[] modules = dir.listFiles(new FilenameFilter(){
+    						@Override
+    						public boolean accept(File dir, String name) {
+    							return name.startsWith("m2m2-") && name.endsWith(".zip");
+    						}
+    					});
+    					
+    					for(File module : modules){
+    						System.out.println("**** Uploading " + module.getAbsolutePath() + "... ****");
+    						uploader.startUploadMonitor(httpclient, "modules");
+    						uploader.postFile(httpclient, module, "modules");
+    						System.out.println("**** Module " + module.getAbsolutePath() + " Uploaded ****");
+    					}
+    					
+    				}
 				}
 				
 			} catch (ClientProtocolException e) {
