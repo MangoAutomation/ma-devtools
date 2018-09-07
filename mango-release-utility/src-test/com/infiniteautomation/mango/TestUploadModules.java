@@ -33,7 +33,7 @@ public class TestUploadModules {
 			
 			props.load(input);
 			//Abort if we don't have a configuration to use
-			if(props.getProperty("enabled", "false").equals("false"))
+			if(!props.getProperty("enabled", "false").equals("true"))
 				return;
 			
 			String url = props.getProperty("store.url");
