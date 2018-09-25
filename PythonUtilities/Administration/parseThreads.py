@@ -3,7 +3,7 @@ from math import log10
 import os
 import re
 
-dirPrefix = "C:\\Days\\2-20-18\\"
+dirPrefix = "C:\\IA\\Days\\9-25-18\\"
 outPrefix = "c-"
 filename = "c.json"
 #file, function, dir
@@ -15,11 +15,13 @@ def writeThreadList(threadSet, file) :
 	file.write("Count: " + str(len(threadSet)) + 
 "\n________________________________________________________________________________\n")
 	for t in threadSet :
-		if len(t["location"]) > 0 :
+		if "location" in t and t["location"] is not None and len(t["location"]) > 0 :
 			file.write("\n    @ %(fileName)s:%(methodName)s:%(lineNumber)d" % 
 				{ "fileName":t["location"][0]["fileName"],
 				"methodName":t["location"][0]["methodName"],
 				"lineNumber":t["location"][0]["lineNumber"]})
+		else:
+			file.write("\n    @Unknown location")
 		try :
 			l10 = log10(t["cpuTime"])
 		except :
@@ -27,8 +29,9 @@ def writeThreadList(threadSet, file) :
 		file.write("""
 		CpuTime: %(cpuTime)d\tUserTime: %(userTime)s\tLogTime: %(logTime)d\tThread: %(name)s\tID: %(id)d
 		--=====--=====--=====--=====--=====--=====--=====--=====--""" % {"id":t["id"], "cpuTime": t["cpuTime"], "logTime": l10, "name": t["name"], "userTime":t["userTime"]})
-		for loc in t["location"] :
-			file.write("""
+		if "location" in t and t["location"] is not None :
+			for loc in t["location"] :
+				file.write("""
 	  %(className)s:%(methodName)s:%(lineNumber)d""" % {"className":loc["className"], "methodName": loc["methodName"], "lineNumber": loc["lineNumber"]})
 		file.write("""
 ________________________________________________________________________________
@@ -57,13 +60,17 @@ def parseThreads(dirPrefix, filename, outPrefix) :
 				runnableThreads.append(thread)
 			else :
 				otherThreads.append(thread)
-		if "location" in thread and len(thread["location"]) > 0 :
+		if "location" in thread and thread["location"] is not None and len(thread["location"]) > 0 :
 			currentLocation = thread["location"][0];
 			currentPlace = currentLocation["methodName"] + " : " + currentLocation["className"] + ":" + str(currentLocation["lineNumber"])
 			if currentPlace in currentPlaces :
 				currentPlaces[currentPlace] += 1
 			else :
 				currentPlaces[currentPlace] = 1
+		elif "none" not in currentPlaces :
+			currentPlaces["none"] = 1
+		else :
+			currentPlaces["none"] += 1
 				
 	blockedThreads.sort(key=lambda x: 0 if "cpuTime" not in x else int(x["cpuTime"]), reverse=True)			
 	blockedThreadsFile = open(dirPrefix + outPrefix + "blockedThreads.out", "w+")
@@ -82,7 +89,7 @@ def parseThreads(dirPrefix, filename, outPrefix) :
 
 	currentPlacesFile = open(dirPrefix + outPrefix + "currentPlaces.out", "w+")
 
-	for key, value in currentPlaces.iteritems() :
+	for key, value in currentPlaces.items() :
 		currentPlacesFile.write(key + "\t" + str(value) + "\n")
 
 	currentPlacesFile.write("\n\n==============THREAD TYPE COUNTS==================\n")		
