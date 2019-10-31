@@ -30,9 +30,9 @@
         </repository>
     </repositories>
     <build>
-        <sourceDirectory>src</sourceDirectory>
-        <testSourceDirectory>test</testSourceDirectory>
-        <directory>maven-target</directory>
+        <!--<sourceDirectory>src</sourceDirectory>-->
+        <!--<testSourceDirectory>test</testSourceDirectory>-->
+        <!--<directory>maven-target</directory>-->
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
