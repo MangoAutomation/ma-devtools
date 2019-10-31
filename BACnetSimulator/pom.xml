@@ -78,17 +78,21 @@
         </plugins>
     </build>
     <dependencies>
-        <!--
-        <dependency>
-            <groupId>com.serotonin</groupId>
-            <artifactId>bacnet4j</artifactId>
-            <version>4.1.7-SNAPSHOT</version>
-        </dependency>
-        -->
+
         <dependency>
             <groupId>com.infiniteautomation</groupId>
             <artifactId>bacnet4j</artifactId>
             <version>5.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.28</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
         </dependency>
     </dependencies>
 </project>

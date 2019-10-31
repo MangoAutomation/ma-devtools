@@ -32,6 +32,7 @@ import com.serotonin.bacnet4j.type.enumerated.ObjectType;
 import com.serotonin.bacnet4j.type.enumerated.PropertyIdentifier;
 import com.serotonin.bacnet4j.type.primitive.*;
 import com.serotonin.bacnet4j.util.RequestUtils;
+import org.slf4j.Logger;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,11 +40,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 /**
  * @author Terry Packer
  *
  */
 public class BacNetLocalSimulator {
+    private static final Logger log = getLogger(BacNetLocalSimulator.class);
     static LocalDevice localDevice;
 
     public static void main(String[] args) throws Exception {
@@ -53,7 +57,7 @@ public class BacNetLocalSimulator {
 
         if (mstp) {
             // Create an MSTP local device
-            System.out.println("Starting MSTP Network");
+            log.info("Starting MSTP Network");
             byte[] bytes = new byte[100];
             InputStream is = new ByteArrayInputStream(bytes);
             OutputStream os = new ByteArrayOutputStream();
@@ -73,7 +77,7 @@ public class BacNetLocalSimulator {
                 if(args.length > 2)
                     broadcast = args[2];
             }
-            System.out.println("Starting IP Network");
+            log.info("Starting IP Network");
             network = new IpNetworkBuilder()
                     .withPort(port)
                     .withLocalBindAddress(bind)
@@ -187,17 +191,17 @@ public class BacNetLocalSimulator {
         @Override
         public void iAmReceived(RemoteDevice d) {
             try {
-                System.out.println("IAm received from " + d);
-                System.out.println("Segmentation: " + d.getSegmentationSupported());
+                log.info("IAm received from " + d);
+                log.info("Segmentation: " + d.getSegmentationSupported());
 
                 Address a = new Address(new Unsigned16(0), new OctetString(
                         new byte[] {(byte) 0xc0, (byte) 0xa8, 0x1, 0x5, (byte) 0xba, (byte) 0xc0}));
 
-                System.out.println("Equals: " + a.equals(d.getAddress()));
+                log.info("Equals: " + a.equals(d.getAddress()));
                 ExtendedDeviceInformationExecutor e1 = new ExtendedDeviceInformationExecutor(d);
                 e1.start();
 
-                System.out.println("Done getting extended information");
+                log.info("Done getting extended information");
 
                 IncomingMessageExecutor e = new IncomingMessageExecutor(d);
                 e.start();
@@ -221,22 +225,22 @@ public class BacNetLocalSimulator {
                 ObjectIdentifier oid = d.getObjectIdentifier();
                 
                 // Get the device's supported services
-                System.out.println("protocolServicesSupported");
+                log.info("protocolServicesSupported");
                 localDevice.send(d,
                         new ReadPropertyRequest(oid, PropertyIdentifier.protocolServicesSupported));
                 //d.setServicesSupported((ServicesSupported) ack.getValue());
 
-                System.out.println("objectName");
+                log.info("objectName");
                 localDevice.send(d,
                         new ReadPropertyRequest(oid, PropertyIdentifier.objectName));
                 //d.setName(ack.getValue().toString());
 
-                System.out.println("protocolVersion");
+                log.info("protocolVersion");
                 localDevice.send(d,
                         new ReadPropertyRequest(oid, PropertyIdentifier.protocolVersion));
                 //d.setProtocolVersion((UnsignedInteger) ack.getValue());
 
-                // System.out.println("protocolRevision");
+                // log.info("protocolRevision");
                 // ack = (ReadPropertyAck) localDevice.send(d, new ReadPropertyRequest(oid,
                 // PropertyIdentifier.protocolRevision));
                 // d.setProtocolRevision((UnsignedInteger) ack.getValue());
@@ -263,7 +267,7 @@ public class BacNetLocalSimulator {
                 List<?> oids;
                 oids = ((SequenceOf<?>) RequestUtils.sendReadPropertyAllowNull(localDevice, d,
                         d.getObjectIdentifier(), PropertyIdentifier.objectList)).getValues();
-                System.out.println(oids);
+                log.info("Oids: {}", oids);
             } catch (BACnetException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
