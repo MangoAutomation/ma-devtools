@@ -25,7 +25,7 @@ import java.util.List;
  * @author Terry Packer
  *
  */
-public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
+public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner {
 
 	private static final String NEWLINE = "\n";
 	/**
@@ -37,7 +37,7 @@ public class ReleaseNotesBulkEditor extends ModuleDirectoryScanner{
 		//notes.add("Adding optional quantization for polls");
 		boolean newCore = true;
 		boolean verbose = false;
-		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("3.5.0", "3.5.x", notes, newCore, verbose);
+		ReleaseNotesBulkEditor tool = new ReleaseNotesBulkEditor("4.0.0", "4.0.x", notes, newCore, verbose);
 		try {
 			tool.scan();
 		} catch (Exception e) {
