@@ -1,7 +1,7 @@
 #Start offset for IDS
 offset = 1
-dataSources=50
-pointsPerSource=100
+dataSources=2
+pointsPerSource=2
 
 output = open("{}-{}-sources-{}-pointsPer-config.json".format(offset,dataSources,pointsPerSource), "w+")
 
@@ -74,8 +74,8 @@ brownian_base = """{
          "overrideIntervalLoggingSamples":false,
          "purgeOverride":false,
          "purgePeriod":1,
-         "readPermission":"user-read",
-         "setPermission":"user-set",
+         "readPermission":"%(DS_XID)s-read",
+         "setPermission":"%(DS_XID)s-set",
          "textRenderer":{
             "type":"ANALOG",
             "useUnitAsSuffix":true,
@@ -106,5 +106,14 @@ for ds in range(dataSources) :
 			output.write(',')
 	if ds < dataSources -1 :
 		output.write(',')
+
+output.write("],\n\t\"roles\":[\n")
+
+for ds in range(dataSources) :
+	PREFIX = "tuna-melt{}-{}-points".format(offset+ds,pointsPerSource)
+	output.write("""\t\t{"xid": "%(rolePrefix)s-set", "name":"%(rolePrefix) set role"},\n""" % {"rolePrefix": PREFIX});
+	output.write("""\t\t{"xid": "%(rolePrefix)s-read", "name":"%(rolePrefix) read role"}""" % {"rolePrefix": PREFIX});
+	if ds < dataSources -1 :
+		output.write(',\n')
 
 output.write("]\n}")
