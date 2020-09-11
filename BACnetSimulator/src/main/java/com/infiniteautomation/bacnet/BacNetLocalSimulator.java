@@ -1,9 +1,19 @@
 /**
  * Copyright (C) 2013 Infinite Automation Software. All rights reserved.
- * 
+ *
  * @author Terry Packer
  */
 package com.infiniteautomation.bacnet;
+
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+
+import org.slf4j.Logger;
 
 import com.serotonin.bacnet4j.LocalDevice;
 import com.serotonin.bacnet4j.RemoteDevice;
@@ -25,22 +35,28 @@ import com.serotonin.bacnet4j.service.confirmed.ReadPropertyRequest;
 import com.serotonin.bacnet4j.service.unconfirmed.WhoIsRequest;
 import com.serotonin.bacnet4j.transport.DefaultTransport;
 import com.serotonin.bacnet4j.transport.Transport;
-import com.serotonin.bacnet4j.type.constructed.*;
+import com.serotonin.bacnet4j.type.constructed.Address;
+import com.serotonin.bacnet4j.type.constructed.BACnetArray;
+import com.serotonin.bacnet4j.type.constructed.CalendarEntry;
+import com.serotonin.bacnet4j.type.constructed.DailySchedule;
+import com.serotonin.bacnet4j.type.constructed.DateRange;
+import com.serotonin.bacnet4j.type.constructed.DeviceObjectPropertyReference;
+import com.serotonin.bacnet4j.type.constructed.SequenceOf;
+import com.serotonin.bacnet4j.type.constructed.SpecialEvent;
+import com.serotonin.bacnet4j.type.constructed.TimeValue;
+import com.serotonin.bacnet4j.type.constructed.WeekNDay;
 import com.serotonin.bacnet4j.type.constructed.WeekNDay.WeekOfMonth;
 import com.serotonin.bacnet4j.type.enumerated.EngineeringUnits;
 import com.serotonin.bacnet4j.type.enumerated.ObjectType;
 import com.serotonin.bacnet4j.type.enumerated.PropertyIdentifier;
-import com.serotonin.bacnet4j.type.primitive.*;
+import com.serotonin.bacnet4j.type.primitive.Date;
+import com.serotonin.bacnet4j.type.primitive.ObjectIdentifier;
+import com.serotonin.bacnet4j.type.primitive.OctetString;
+import com.serotonin.bacnet4j.type.primitive.Real;
+import com.serotonin.bacnet4j.type.primitive.Time;
+import com.serotonin.bacnet4j.type.primitive.Unsigned16;
+import com.serotonin.bacnet4j.type.primitive.UnsignedInteger;
 import com.serotonin.bacnet4j.util.RequestUtils;
-import org.slf4j.Logger;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Terry Packer
@@ -65,10 +81,10 @@ public class BacNetLocalSimulator {
             MstpNode node = new SlaveNode("SlaveNode", is, os, (byte) 3);
             network = new MstpNetwork(node, 20);
         } else {
-            String bind = "0.0.0.0";
+            String bind = "192.168.1.8";
             int port = 47808;
             String broadcast = "255.255.255.255";
-            
+
             if(args != null) {
                 if(args.length > 0)
                     bind = args[0];
@@ -84,8 +100,8 @@ public class BacNetLocalSimulator {
                     .withLocalNetworkNumber(20)
                     .withBroadcast(broadcast, 255)
                     .build();
-                    
-       }
+
+        }
 
 
 
@@ -153,8 +169,8 @@ public class BacNetLocalSimulator {
                         new SequenceOf<>(new TimeValue(new Time(10, 30, 0, 0), new Real(24)),
                                 new TimeValue(new Time(17, 0, 0, 0), new Real(25))),
                         new UnsignedInteger(6)) // 7th is a Wednesday
-        );
-        
+                );
+
         final AnalogValueObject av0 = new AnalogValueObject(localDevice, 2, "av2", 98, EngineeringUnits.amperes, false)
                 .supportCommandable(-2);
         final AnalogValueObject av1 = new AnalogValueObject(localDevice, 3, "av3", 99, EngineeringUnits.amperesPerMeter, false)
@@ -163,7 +179,7 @@ public class BacNetLocalSimulator {
         final SequenceOf<DeviceObjectPropertyReference> listOfObjectPropertyReferences = new SequenceOf<>( //
                 new DeviceObjectPropertyReference(av0.getId(), PropertyIdentifier.presentValue, null, null), //
                 new DeviceObjectPropertyReference(av1.getId(), PropertyIdentifier.presentValue, null, null) //
-        );
+                );
 
         final ScheduleObject so = new ScheduleObject(localDevice, 0, "sch0", effectivePeriod, weeklySchedule, exceptionSchedule,
                 new Real(8), listOfObjectPropertyReferences, 12, false);
@@ -195,7 +211,7 @@ public class BacNetLocalSimulator {
                 log.info("Segmentation: " + d.getSegmentationSupported());
 
                 Address a = new Address(new Unsigned16(0), new OctetString(
-                        new byte[] {(byte) 0xc0, (byte) 0xa8, 0x1, 0x5, (byte) 0xba, (byte) 0xc0}));
+                        new byte[] {(byte) 0xc0, (byte) 0xa8, 0x1, 0x5, (byte) 0xba, (byte) 0xc0}), true);
 
                 log.info("Equals: " + a.equals(d.getAddress()));
                 ExtendedDeviceInformationExecutor e1 = new ExtendedDeviceInformationExecutor(d);
@@ -223,7 +239,7 @@ public class BacNetLocalSimulator {
         public void run() {
             try {
                 ObjectIdentifier oid = d.getObjectIdentifier();
-                
+
                 // Get the device's supported services
                 log.info("protocolServicesSupported");
                 localDevice.send(d,
