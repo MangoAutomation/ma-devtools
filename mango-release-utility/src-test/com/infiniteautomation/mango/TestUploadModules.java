@@ -21,43 +21,43 @@ import com.infiniteautomation.store.BulkModuleUploader;
 
 /**
  * Upload the core and all modules to the store using a properties file that may have been defined.
- * 
+ *
  * @author Terry Packer
  */
 public class TestUploadModules {
 
-	@Test
-	public void testUploadAllModules(){
-		Properties props = new Properties();
-		try(InputStream input = getClass().getClassLoader().getResourceAsStream("moduleUpload.properties")){
-			
-			props.load(input);
-			//Abort if we don't have a configuration to use
-			if(!props.getProperty("enabled", "false").equals("true"))
-				return;
-			
-			String url = props.getProperty("store.url");
-			String username = props.getProperty("store.username");
-			String password = props.getProperty("store.password");
-			String moduleDirs = props.getProperty("modules.dirs");
-			String coreZip = props.getProperty("core.zip"); //Directory where the core zip lives
-			String uploadModulesString = props.getProperty("modules.upload");
-			boolean uploadModules = false;
-			if(uploadModulesString != null) {
-			    uploadModules = Boolean.parseBoolean(uploadModulesString);
-			}
-			
-			BulkModuleUploader uploader = new BulkModuleUploader(url);
-			
-			try {
-				HttpClient httpclient = uploader.login(username, password);
-				System.out.println("Logged in as: " + username);
-				
-				//Upload Core if there is one
-				File core = new File(coreZip);
-				if(core.exists() && core.isDirectory()) {
-				    String[] cores = core.list(new FilenameFilter() {
-                        
+    @Test
+    public void testUploadAllModules(){
+        Properties props = new Properties();
+        try(InputStream input = getClass().getClassLoader().getResourceAsStream("moduleUpload.properties")){
+
+            props.load(input);
+            //Abort if we don't have a configuration to use
+            if(!props.getProperty("enabled", "false").equals("true"))
+                return;
+
+            String url = props.getProperty("store.url");
+            String username = props.getProperty("store.username");
+            String password = props.getProperty("store.password");
+            String moduleDirs = props.getProperty("modules.dirs");
+            String coreZip = props.getProperty("core.zip"); //Directory where the core zip lives
+            String uploadModulesString = props.getProperty("modules.upload");
+            boolean uploadModules = false;
+            if(uploadModulesString != null) {
+                uploadModules = Boolean.parseBoolean(uploadModulesString);
+            }
+
+            BulkModuleUploader uploader = new BulkModuleUploader(url);
+
+            try {
+                HttpClient httpclient = uploader.login(username, password);
+                System.out.println("Logged in as: " + username);
+
+                //Upload Core if there is one
+                File core = new File(coreZip);
+                if(core.exists() && core.isDirectory()) {
+                    String[] cores = core.list(new FilenameFilter() {
+
                         @Override
                         public boolean accept(File dir, String name) {
                             if(name.startsWith("m2m2-core-") && name.endsWith(".zip"))
@@ -66,56 +66,59 @@ public class TestUploadModules {
                                 return false;
                         }
                     });
-				    
-				    for(String coreName : cores) {
-				        File coreUpload = new File(core, coreName);
-    				    System.out.println("**** Uploading " + coreUpload.getAbsolutePath() + "... ****");
+
+                    for(String coreName : cores) {
+                        File coreUpload = new File(core, coreName);
+                        System.out.println("**** Uploading " + coreUpload.getAbsolutePath() + "... ****");
                         uploader.startUploadMonitor(httpclient, "core");
                         uploader.postFile(httpclient, coreUpload, "core");
                         System.out.println("**** " + coreUpload.getAbsolutePath() + " Uploaded ****");
-				    }
-				}
-				
-				//Are we supposed to upload modules?
-				if(!uploadModules)
-				    return;
-				
-				//Upload Modules
-				String[] moduleDirNames = moduleDirs.split(",");
-				for(String moduleDir : moduleDirNames) {
-    				File dir = new File(moduleDir);
-    				if(!dir.exists())
-    					fail("Directory " + moduleDir + " doesn't exist.");
-    				
-    				if(dir.isDirectory()){
-    					File[] modules = dir.listFiles(new FilenameFilter(){
-    						@Override
-    						public boolean accept(File dir, String name) {
-    							return name.startsWith("m2m2-") && name.endsWith(".zip");
-    						}
-    					});
-    					
-    					for(File module : modules){
-    						System.out.println("**** Uploading " + module.getAbsolutePath() + "... ****");
-    						uploader.startUploadMonitor(httpclient, "modules");
-    						uploader.postFile(httpclient, module, "modules");
-    						System.out.println("**** Module " + module.getAbsolutePath() + " Uploaded ****");
-    					}
-    					
-    				}
-				}
-				
-			} catch (ClientProtocolException e) {
-				fail(e.getMessage());
-			} catch (IOException e) {
-				fail(e.getMessage());
-			}
-			
-		} catch (FileNotFoundException e) {
-			fail(e.getMessage());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-	}
-	
+                    }
+                }
+
+                //Are we supposed to upload modules?
+                if(!uploadModules)
+                    return;
+
+                //Upload Modules
+                String[] moduleDirNames = moduleDirs.split(",");
+                for(String moduleDir : moduleDirNames) {
+                    System.out.println("Checking for modules at " + moduleDir);
+                    File dir = new File(moduleDir);
+                    if(!dir.exists())
+                        fail("Directory " + moduleDir + " doesn't exist.");
+
+                    if(dir.isDirectory()){
+                        File[] modules = dir.listFiles(new FilenameFilter(){
+                            @Override
+                            public boolean accept(File dir, String name) {
+                                return name.startsWith("m2m2-") && name.endsWith(".zip");
+                            }
+                        });
+                        if(modules.length == 0) {
+                            System.out.println("No modules found to upload.");
+                        }
+                        for(File module : modules){
+                            System.out.println("**** Uploading " + module.getAbsolutePath() + "... ****");
+                            uploader.startUploadMonitor(httpclient, "modules");
+                            uploader.postFile(httpclient, module, "modules");
+                            System.out.println("**** Module " + module.getAbsolutePath() + " Uploaded ****");
+                        }
+
+                    }
+                }
+
+            } catch (ClientProtocolException e) {
+                fail(e.getMessage());
+            } catch (IOException e) {
+                fail(e.getMessage());
+            }
+
+        } catch (FileNotFoundException e) {
+            fail(e.getMessage());
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
 }
